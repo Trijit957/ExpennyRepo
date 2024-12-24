@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
 	Sidebar,
@@ -12,6 +14,11 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { HomeIcon, WalletIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
+import { Theme } from "@/providers/theme-provider";
+import Link from "next/link";
 
 const items = [
 	{
@@ -27,6 +34,9 @@ const items = [
 ];
 
 function AppSidebar() {
+	const pathname = usePathname();
+	const { theme } = useTheme();
+	console.log("pathname", pathname);
 	return (
 		<Sidebar>
 			<SidebarHeader />
@@ -38,10 +48,16 @@ function AppSidebar() {
 							{items.map(item => (
 								<SidebarMenuItem key={item.title}>
 									<SidebarMenuButton asChild>
-										<a href={item.url}>
+										<Link
+											href={item.url}
+											className={cn({
+												"bg-slate-200": pathname.startsWith(item.url) && theme === Theme.LIGHT,
+												"bg-slate-700": pathname.startsWith(item.url) && theme === Theme.DARK,
+											})}
+										>
 											<item.icon />
 											<span>{item.title}</span>
-										</a>
+										</Link>
 									</SidebarMenuButton>
 								</SidebarMenuItem>
 							))}

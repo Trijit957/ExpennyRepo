@@ -6,6 +6,10 @@ import {
 	ClientSideRowModelModule,
 	ColDef,
 	Theme as DataTableTheme,
+	DateFilterModule,
+	NumberFilterModule,
+	PaginationModule,
+	TextFilterModule,
 	colorSchemeDarkBlue,
 	colorSchemeLightCold,
 } from "ag-grid-community";
@@ -15,7 +19,13 @@ import { ModuleRegistry } from "ag-grid-community";
 import { useTheme } from "next-themes";
 import { Theme } from "@/providers/theme-provider";
 
-ModuleRegistry.registerModules([ClientSideRowModelModule]);
+ModuleRegistry.registerModules([
+	ClientSideRowModelModule,
+	PaginationModule,
+	NumberFilterModule,
+	TextFilterModule,
+	DateFilterModule,
+]);
 
 interface DataTableProps<TRowData> extends AgGridReactProps {
 	rowData: TRowData[];
@@ -40,12 +50,11 @@ function DataTable<TRowData>({ rowData, columnDefs, ...props }: DataTableProps<T
 	}, [theme]);
 
 	return (
-		<div style={{ height: 500 }}>
+		<div style={{ height: 600 }}>
 			<AgGridReact<TRowData>
 				theme={dataTableTheme}
 				rowData={rowData}
 				columnDefs={columnDefs}
-				pagination
 				{...props}
 			/>
 		</div>

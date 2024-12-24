@@ -17,7 +17,7 @@ import { useAuth, useUser } from "@clerk/nextjs";
 
 function ProfileMenu() {
 	const { user } = useUser();
-	const { signOut } = useAuth();
+	const { signOut, userId } = useAuth();
 	return (
 		<div>
 			<DropdownMenu>

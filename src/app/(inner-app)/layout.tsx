@@ -1,8 +1,14 @@
+"use client";
+
 import Header from "@/components/expenny/header/header";
-import AppSidebar from "@/components/expenny/sidebar/app-sidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { ReactChildren } from "@/globals/type";
+import dynamic from "next/dynamic";
 import React from "react";
+
+const AppSidebar = dynamic(() => import("@/components/expenny/sidebar/app-sidebar"), {
+	ssr: false,
+});
 
 function InnerAppLayout({ children }: ReactChildren) {
 	return (
