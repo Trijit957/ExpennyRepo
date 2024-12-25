@@ -45,3 +45,40 @@ export async function getTransactions(userId: string) {
 		console.error(error);
 	}
 }
+
+export async function editTransaction(transaction: Transaction) {
+	try {
+		await databases.updateDocument(
+			process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+			process.env.NEXT_PUBLIC_TRANSACTION_COLLECTION_ID!,
+			transaction.$id!, // documentId
+			{
+				name: transaction.name,
+				type: transaction.type,
+				amount: transaction.amount,
+				category: transaction.category,
+				date: transaction.date,
+				note: transaction.note,
+			}
+			// ["read("any")"] // permissions (optional)
+		);
+		return "success";
+	} catch (error) {
+		console.error(error);
+		return "error";
+	}
+}
+
+export async function deleteTransaction(transactionId: string) {
+	try {
+		await databases.deleteDocument(
+			process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+			process.env.NEXT_PUBLIC_TRANSACTION_COLLECTION_ID!,
+			transactionId
+		);
+		return "success";
+	} catch (error) {
+		console.error(error);
+		return "error";
+	}
+}

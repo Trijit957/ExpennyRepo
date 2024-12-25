@@ -8,7 +8,7 @@ function Header() {
 		<div className="flex justify-between items-center py-4 px-24">
 			<div className="flex items-center gap-2">
 				<SidebarTrigger />
-				Expenny
+				<span className="text-xl">Expenny</span>
 			</div>
 			<div className="flex gap-10 items-center">
 				<ProfileMenu />

@@ -84,8 +84,9 @@ function FormComboBox({
 									className={cn("!mt-0 justify-between", !field.value && "text-muted-foreground")}
 								>
 									{field.value
-										? items.find(item => item.value === field.value)?.label
-										: placeholder}
+										? field.value
+										: // ? items.find(item => item.value === field.value)?.label
+										  placeholder}
 									<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 								</Button>
 							</FormControl>
@@ -104,16 +105,16 @@ function FormComboBox({
 										{items.map(item => (
 											<CommandItem
 												value={item.label}
-												key={item.value}
+												key={item.label}
 												onSelect={() => {
-													setValue(name, item.value);
+													setValue(name, item.label);
 												}}
 											>
 												{item.label}
 												<Check
 													className={cn(
 														"ml-auto",
-														item.value === field.value ? "opacity-100" : "opacity-0"
+														item.label === field.value ? "opacity-100" : "opacity-0"
 													)}
 												/>
 											</CommandItem>

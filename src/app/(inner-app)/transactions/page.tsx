@@ -1,22 +1,61 @@
 "use client";
 
-import { getTransactions } from "@/actions/transaction-action";
+import { deleteTransaction, getTransactions } from "@/actions/transaction-action";
+import AlertModal from "@/components/expenny/alert-modal/alert-modal";
 import ContainerLayout from "@/components/expenny/container-layout/container-layout";
 import TopRowButton from "@/components/expenny/container-layout/top-row-button";
 import DataTable, { ColumnDef } from "@/components/expenny/data-table/data-table";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import Modal from "@/components/expenny/modal/modal";
+import EditTransactionModal from "@/components/expenny/transactions/edit-transaction-modal";
+import ViewTransactionModal from "@/components/expenny/transactions/view-transaction-modal";
 import { Transaction } from "@/globals/type";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@clerk/nextjs";
 import { format } from "date-fns";
 import { Edit3Icon, PlusIcon, Trash2Icon, ViewIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
+type TransactionAction = "view" | "edit" | "delete";
+
 function Transactions() {
 	const { userId } = useAuth();
 	const { push } = useRouter();
+	const { toast } = useToast();
 	const [transactions, setTransactions] = useState<Transaction[]>([]);
+	const [selectedTransaction, setSelecetedTransaction] = useState<Transaction>();
+	const [transactionAction, setTransactionAction] = useState<TransactionAction>();
+	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+	const [isAlertModalOpen, setIsAlertModalOpen] = useState<boolean>(false);
+
+	const getAllTransactions = async () => {
+		const response = await getTransactions(userId!);
+		if (response?.documents.length) {
+			setTransactions(response.documents as unknown as Transaction[]);
+		}
+	};
+
+	const handleTransactionAction = (transaction: Transaction, action: TransactionAction) => {
+		setTransactionAction(action);
+		setSelecetedTransaction(transaction);
+		setIsModalOpen(true);
+	};
+
+	const handleDeleteTransaction = async (transaction: Transaction) => {
+		const deleteResponse = await deleteTransaction(transaction.$id!);
+		if (deleteResponse === "success") {
+			getAllTransactions();
+			toast({
+				title: "Transaction deleted successfully!",
+			});
+		} else {
+			toast({
+				title: "Failed to delete transaction!",
+				description: "Please try again later",
+				variant: "destructive",
+			});
+		}
+	};
 
 	const columnDefs: ColumnDef<Transaction>[] = [
 		{
@@ -65,7 +104,6 @@ function Transactions() {
 					return 0;
 				},
 			},
-			// valueGetter: ({ data }) => format(data?.date ?? "", "yyyy-mm-dd"),
 			valueFormatter: ({ data }) => format(data?.date ?? "", "dd-MMM-yyyy"),
 		},
 		{
@@ -83,31 +121,29 @@ function Transactions() {
 		{
 			headerName: "Actions",
 			flex: 1,
-			cellRenderer: () => {
+			cellRenderer: ({ data }: { data: Transaction }) => {
 				return (
 					<div className="p-4 flex justify-center items-center gap-4">
-						{/* <Button> */}
-						<ViewIcon className="cursor-pointer h-4 w-4" />
-						{/* </Button> */}
-						{/* <Button> */}
-						<Edit3Icon className="cursor-pointer h-4 w-4" />
-						{/* </Button> */}
-						{/* <Button> */}
-						<Trash2Icon className=" cursor-pointer h-4 w-4" />
-						{/* </Button> */}
+						<ViewIcon
+							className="cursor-pointer h-4 w-4"
+							onClick={() => handleTransactionAction(data, "view")}
+						/>
+						<Edit3Icon
+							className="cursor-pointer h-4 w-4"
+							onClick={() => handleTransactionAction(data, "edit")}
+						/>
+						<Trash2Icon
+							className=" cursor-pointer h-4 w-4"
+							onClick={() => {
+								setSelecetedTransaction(data);
+								setIsAlertModalOpen(true);
+							}}
+						/>
 					</div>
 				);
 			},
 		},
 	];
-
-	const getAllTransactions = async () => {
-		const response = await getTransactions(userId!);
-		console.log("response", response);
-		if (response?.documents.length) {
-			setTransactions(response.documents as unknown as Transaction[]);
-		}
-	};
 
 	useEffect(() => {
 		if (userId) {
@@ -118,7 +154,7 @@ function Transactions() {
 	return (
 		<ContainerLayout
 			pageTitle="Transactions"
-			pageSubTitle="Filtering transactions from 2023-11-17 to 2024-11-17"
+			pageSubTitle="Track and manage all your transactions in one place"
 			topRowButtonComp={
 				<TopRowButton
 					label="Add Transactions"
@@ -132,6 +168,44 @@ function Transactions() {
 			<div className="mt-5">
 				<DataTable<Transaction> rowData={transactions} columnDefs={columnDefs} pagination />
 			</div>
+			<Modal
+				title={
+					transactionAction === "view"
+						? "View Transaction"
+						: transactionAction === "edit"
+						? "Edit Transaction"
+						: ""
+				}
+				description={
+					transactionAction === "view"
+						? "Details of the transaction"
+						: transactionAction === "edit"
+						? "Update the transaction"
+						: ""
+				}
+				isOpen={isModalOpen}
+				onClose={setIsModalOpen}
+			>
+				{transactionAction === "view" && (
+					<ViewTransactionModal transaction={selectedTransaction!} />
+				)}
+				{transactionAction === "edit" && (
+					<EditTransactionModal
+						transaction={selectedTransaction!}
+						onAfterUpdate={() => getAllTransactions()}
+						onEditModalClose={() => setIsModalOpen(false)}
+					/>
+				)}
+			</Modal>
+			<AlertModal
+				isOpen={isAlertModalOpen}
+				onClose={setIsAlertModalOpen}
+				title="Are you absolutely sure?"
+				description="This action cannot be undone. This will permanently delete your account
+        and remove your data from our servers."
+				actionText="Delete"
+				onActionClick={() => handleDeleteTransaction(selectedTransaction!)}
+			/>
 		</ContainerLayout>
 	);
 }

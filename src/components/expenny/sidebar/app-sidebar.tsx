@@ -13,7 +13,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { HomeIcon, WalletIcon } from "lucide-react";
+import { HomeIcon, LayoutDashboardIcon, WalletIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
@@ -24,7 +24,7 @@ const items = [
 	{
 		title: "Dashboard",
 		url: "/dashboard",
-		icon: HomeIcon,
+		icon: LayoutDashboardIcon,
 	},
 	{
 		title: "Transactions",
