@@ -27,3 +27,10 @@ export interface Category {
 	user_id?: string;
 	name: string;
 }
+
+export enum FinanceType {
+	INCOME,
+	EXPENSE,
+	SAVINGS,
+	TRANSACTIONS,
+}

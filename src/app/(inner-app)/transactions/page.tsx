@@ -27,12 +27,14 @@ function Transactions() {
 	const [transactionAction, setTransactionAction] = useState<TransactionAction>();
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 	const [isAlertModalOpen, setIsAlertModalOpen] = useState<boolean>(false);
+	const [isTransactionListPending, setTransactionListPending] = useState<boolean>(true);
 
 	const getAllTransactions = async () => {
 		const response = await getTransactions(userId!);
 		if (response?.documents.length) {
 			setTransactions(response.documents as unknown as Transaction[]);
 		}
+		setTransactionListPending(false);
 	};
 
 	const handleTransactionAction = (transaction: Transaction, action: TransactionAction) => {
@@ -63,6 +65,7 @@ function Transactions() {
 			field: "name",
 			flex: 1,
 			filter: true,
+			//width: 300,
 		},
 		{
 			headerName: "Amount",
@@ -166,7 +169,13 @@ function Transactions() {
 			}
 		>
 			<div className="mt-5">
-				<DataTable<Transaction> rowData={transactions} columnDefs={columnDefs} pagination />
+				<DataTable<Transaction>
+					rowData={transactions}
+					columnDefs={columnDefs}
+					pagination
+					loading={isTransactionListPending}
+					overlayLoadingTemplate="<span class='ag-overlay-loading-center'>Loading transactions...</span>"
+				/>
 			</div>
 			<Modal
 				title={

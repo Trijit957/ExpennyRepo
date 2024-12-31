@@ -1,5 +1,5 @@
 import { ID, databases } from "@/app/utils/appwrite";
-import { Transaction } from "@/globals/type";
+import { Transaction, TransactionTypeEnum } from "@/globals/type";
 import { Models, Query } from "appwrite";
 
 export async function createTransaction(transaction: Transaction) {
@@ -80,5 +80,21 @@ export async function deleteTransaction(transactionId: string) {
 	} catch (error) {
 		console.error(error);
 		return "error";
+	}
+}
+
+export async function getTransactionsByDate(userId: string, startDate: string, endDate: string) {
+	try {
+		return await databases.listDocuments(
+			process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+			process.env.NEXT_PUBLIC_TRANSACTION_COLLECTION_ID!,
+			[
+				Query.equal("user_id", userId),
+				Query.greaterThanEqual("date", startDate),
+				Query.lessThanEqual("date", endDate),
+			]
+		);
+	} catch (error) {
+		console.log(error);
 	}
 }

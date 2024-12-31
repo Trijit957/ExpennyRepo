@@ -7,6 +7,7 @@ import {
 	ColDef,
 	Theme as DataTableTheme,
 	DateFilterModule,
+	GridApi,
 	NumberFilterModule,
 	PaginationModule,
 	TextFilterModule,
