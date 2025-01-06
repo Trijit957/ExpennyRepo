@@ -2,6 +2,7 @@
 
 import { getTransactionsByDate } from "@/actions/transaction-action";
 import TransactionChart, {
+  MonthWiseTransactionChartData,
   TransactionChartData,
 } from "@/components/expenny/charts/transaction-chart";
 import ContainerLayout from "@/components/expenny/container-layout/container-layout";
@@ -29,6 +30,8 @@ function Dashboard() {
   const [transactionChartData, setTransactionChartData] = useState<
     TransactionChartData[]
   >([]);
+  const [monthWiseTransactionChartData, setMonthWiseTransactionChartData] =
+    useState<MonthWiseTransactionChartData[]>([]);
 
   const getTransactions = async () => {
     const response = await getTransactionsByDate(
@@ -125,7 +128,33 @@ function Dashboard() {
       });
     });
     console.log("chartData", chartData);
+    createMonthwiseTransactionChartData(chartData);
     setTransactionChartData(chartData);
+  };
+
+  const createMonthwiseTransactionChartData = (
+    chartData: TransactionChartData[]
+  ) => {
+    const data = chartData.reduce((acc: any, { date, income, expense }) => {
+      const [_, month, year] = date.split("/").map(Number);
+      const monthName = new Date(year, month - 1).toLocaleString("default", {
+        month: "short",
+      });
+      const monthYear = `${monthName} ${year}`;
+      const existingEntry = acc.find(
+        (entry: any) => entry.monthYear === monthYear
+      );
+
+      if (existingEntry) {
+        existingEntry.income += income;
+        existingEntry.expense += expense;
+      } else {
+        acc.push({ monthYear, income, expense });
+      }
+      return acc;
+    }, []);
+
+    setMonthWiseTransactionChartData(data);
   };
 
   useEffect(() => {
@@ -168,7 +197,11 @@ function Dashboard() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-7">
           <div className="col-span-4">
             {transactionChartData?.length > 0 && (
-              <TransactionChart chartData={transactionChartData} />
+              <TransactionChart
+                date={{ from: dateRange?.from!, to: dateRange?.to! }}
+                chartData={transactionChartData}
+                monthWiseTransactionChartData={monthWiseTransactionChartData}
+              />
             )}
           </div>
           <div className="col-span-4 xl:col-span-3">hello</div>

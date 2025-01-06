@@ -1,7 +1,5 @@
-"use client";
-
 import React from "react";
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+
 import {
   Card,
   CardContent,
@@ -10,85 +8,66 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { format } from "date-fns";
+import TabsLayout from "../tabs-layout/tabs-layout";
+import TransactionLineChart from "./transaction-line-chart";
+import TransactionBarChart from "./transaction-bar-chart";
 
-// const chartData = [
-//   { month: "January", desktop: 186, mobile: 80 },
-//   { month: "February", desktop: 305, mobile: 200 },
-//   { month: "March", desktop: 237, mobile: 120 },
-//   { month: "April", desktop: 73, mobile: 190 },
-//   { month: "May", desktop: 209, mobile: 130 },
-//   { month: "June", desktop: 214, mobile: 140 },
-// ];
-
-const chartConfig = {
-  expense: {
-    label: "Expense",
-    color: "hsl(var(--chart-5))",
-  },
-  income: {
-    label: "Income",
-    color: "hsl(var(--chart-2))",
-  },
-} satisfies ChartConfig;
-
-export interface TransactionChartData {
-  date: string;
+interface BaseTransactionChartData {
   income: number;
   expense: number;
 }
-
-interface TransactionChartProps {
-  chartData: TransactionChartData[];
+export interface TransactionChartData extends BaseTransactionChartData {
+  date: string;
 }
 
-function TransactionChart({ chartData }: TransactionChartProps) {
+export interface MonthWiseTransactionChartData
+  extends BaseTransactionChartData {
+  monthYear: string;
+}
+interface TransactionChartProps {
+  chartData: TransactionChartData[];
+  monthWiseTransactionChartData: MonthWiseTransactionChartData[];
+  date: {
+    from: Date;
+    to: Date;
+  };
+}
+
+function TransactionChart({
+  chartData,
+  monthWiseTransactionChartData,
+  date: { from, to },
+}: TransactionChartProps) {
   return (
-    <Card>
+    <Card className="relative">
       <CardHeader>
-        <CardTitle>Line Chart - Multiple</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardTitle className="mb-2">Transaction overview</CardTitle>
+        <CardDescription>
+          {format(from, "dd-MMM-yyyy")} to {format(to, "dd-MMM-yyyy")}
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
-          <LineChart
-            accessibilityLayer
-            data={chartData}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              // tickFormatter={(value) => value.slice(0, 3)}
-            />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Line
-              dataKey="expense"
-              type="monotone"
-              stroke="var(--color-expense)"
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              dataKey="income"
-              type="monotone"
-              stroke="var(--color-income)"
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
-        </ChartContainer>
+        <TabsLayout
+          tabsClassName="mt-5"
+          tabListClassName="w-[200px] absolute top-[14px] right-[24px]"
+          tabInfo={[
+            {
+              label: "Daily",
+              value: "daily",
+              component: <TransactionLineChart chartData={chartData} />,
+            },
+            {
+              label: "Monthly",
+              value: "monthly",
+              component: (
+                <TransactionBarChart
+                  chartData={monthWiseTransactionChartData}
+                />
+              ),
+            },
+          ]}
+        />
       </CardContent>
       <CardFooter>
         <div className="flex w-full items-start gap-2 text-sm">footer</div>
